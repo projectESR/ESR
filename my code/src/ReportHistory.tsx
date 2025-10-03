@@ -1,33 +1,32 @@
 import { useEffect, useState } from 'react';
 import { FileText, Calendar, TrendingUp, Loader2 } from 'lucide-react';
-import { supabase, BloodReport } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
+
+interface Report {
+  id: number;
+  image_url: string;
+  result: string;
+  created_at: string;
+}
 
 interface ReportHistoryProps {
   onViewReport: (reportId: string) => void;
 }
 
 export default function ReportHistory({ onViewReport }: ReportHistoryProps) {
-  const { user } = useAuth();
-  const [reports, setReports] = useState<BloodReport[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchReports();
-  }, [user]);
+  }, []);
 
   const fetchReports = async () => {
-    if (!user) return;
-
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('blood_reports')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const response = await fetch('http://localhost:8000/reports');
+      if (!response.ok) throw new Error('Failed to load reports');
+      const data = await response.json();
+      setReports(data);
       setReports(data || []);
     } catch (error) {
       console.error('Error fetching reports:', error);

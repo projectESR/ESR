@@ -1,11 +1,9 @@
 import { useState, useRef } from 'react';
-import { Droplet, Upload, Camera, History, LogOut, FileText, Loader2, X } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { Droplet, Upload, Camera, History, FileText, Loader2, X } from 'lucide-react';
 import ReportHistory from './ReportHistory';
 import ReportDetail from './ReportDetail';
 
 export default function MainApp() {
-  const { user, signOut } = useAuth();
   const [view, setView] = useState<'upload' | 'history' | 'report'>('upload');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -68,25 +66,10 @@ export default function MainApp() {
       if (!response.ok) throw new Error('Analysis failed');
       const analysis = await response.json();
       setResult(analysis);
-
-      // Save to Supabase
-      if (user) {
-        // Optionally upload image to Supabase Storage for a public URL
-        // For now, use previewUrl as image_url
-        await supabase
-          .from('blood_reports')
-          .insert([
-            {
-              user_id: user.id,
-              blood_type: analysis.blood_type,
-              confidence_score: analysis.confidence_score,
-              analysis_data: analysis.analysis_data,
-              image_url: previewUrl,
-            },
-          ]);
-      }
+      setView('report');
     } catch (error) {
       console.error('Analysis error:', error);
+      alert('An error occurred during analysis');
     } finally {
       setAnalyzing(false);
     }
@@ -122,17 +105,9 @@ export default function MainApp() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-red-50 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-700">{user?.email}</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 rounded-lg">
+                <span className="text-sm text-gray-700">Blood Analysis System</span>
               </div>
-              <button
-                onClick={() => signOut()}
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-red-600 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
             </div>
           </div>
         </div>

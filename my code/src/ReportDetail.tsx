@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Calendar, TrendingUp, Droplet, Loader2 } from 'lucide-react';
-import { supabase, BloodReport } from '../lib/supabase';
+import { supabase } from './supabase';
 
 interface ReportDetailProps {
   reportId: string;
